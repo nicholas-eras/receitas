@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: receitas-db
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: receitas
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./back
+      dockerfile: dockerfile
+    container_name: receitas-back
+    volumes:
+      - ./back:/app
+    working_dir: /app
+    ports:
+      - "3001:3001"
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/receitas
+    command: pnpm run start:dev
+    depends_on:
+      - postgres
+
+  frontend:
+    build:
+      context: ./front
+      dockerfile: dockerfile
+    container_name: receitas-front
+    volumes:
+      - ./front:/app
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+    command: pnpm dev
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
