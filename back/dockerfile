@@ -1,10 +1,16 @@
-FROM node:20
+FROM node:18-alpine
 
 WORKDIR /app
 
-COPY package.json ./
-COPY pnpm-lock.yaml ./
-RUN corepack enable && corepack prepare pnpm@latest --activate
-RUN pnpm install
+# Instalar dependências
+COPY package*.json ./
+RUN npm install
 
-CMD ["pnpm", "start:dev"]
+# Copiar todo o projeto
+COPY . .
+
+# Expor porta padrão do NestJS
+EXPOSE 3000
+
+# Rodar em modo dev com hot reload
+CMD ["npx", "ts-node-dev", "--respawn", "--transpile-only", "src/main.ts"]
