@@ -26,7 +26,6 @@ services:
       - "3001:3001"
     environment:
       DATABASE_URL: postgres://postgres:postgres@postgres:5432/receitas
-    command: npm run start:dev
     depends_on:
       - postgres
 

@@ -1,34 +1,47 @@
 import {
-  Controller, Get, Post, Put, Delete, Body, Param
-} from '@nestjs/common'
-import { RecipesService } from './recipes.service'
+  Controller, Get, Post, Put, Delete, Body, Param, UseInterceptors, UploadedFiles
+} from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { RecipesService } from './recipes.service';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 @Controller('recipes')
 export class RecipesController {
-  constructor(private readonly recipesService: RecipesService) {}
+  constructor(
+    private readonly recipesService: RecipesService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   @Get()
   findAll() {
-    return this.recipesService.findAll()
+    return this.recipesService.findAll();
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.recipesService.findOne(id)
+    return this.recipesService.findOne(id);
   }
 
   @Post()
-  create(@Body() body: any) {
-    return this.recipesService.create(body)
+  @UseInterceptors(FilesInterceptor('files'))
+  async create(
+    @UploadedFiles() files: Express.Multer.File[],
+    @Body() body: any
+  ) {
+    const imageUrls = await this.cloudinaryService.uploadMany(files);
+    return this.recipesService.create({
+      ...body,
+      imageUrls,
+    });
   }
 
   @Put(':id')
   update(@Param('id') id: string, @Body() body: any) {
-    return this.recipesService.update(id, body)
+    return this.recipesService.update(id, body);
   }
 
   @Delete(':id')
   delete(@Param('id') id: string) {
-    return this.recipesService.delete(id)
+    return this.recipesService.delete(id);
   }
 }

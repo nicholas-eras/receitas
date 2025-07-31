@@ -1,16 +1,12 @@
-FROM node:18-alpine
+FROM node:20-alpine
 
-WORKDIR /app
+WORKDIR /app/
 
-# Instalar dependências
-COPY package*.json ./
+COPY package*.json .
+COPY prisma ./prisma
+
 RUN npm install
 
-# Copiar todo o projeto
 COPY . .
 
-# Expor porta padrão do NestJS
-EXPOSE 3000
-
-# Rodar em modo dev com hot reload
-CMD ["npx", "ts-node-dev", "--respawn", "--transpile-only", "src/main.ts"]
+CMD ["sh", "-c", "npx prisma migrate dev && npm run start:dev"]

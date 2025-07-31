@@ -20,5 +20,14 @@ model Recipe {
   timeMinutes Int
   ingredients String[]
   steps       String[]
+  images      Image[]
   createdAt   DateTime @default(now())
+}
+
+model Image {
+  id        String   @id @default(uuid())
+  url       String
+  publicId  String
+  recipe    Recipe   @relation(fields: [recipeId], references: [id])
+  recipeId  String
 }
