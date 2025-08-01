@@ -3,7 +3,7 @@ import {
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { RecipesService } from './recipes.service';
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Controller('recipes')
 export class RecipesController {
