@@ -42,7 +42,7 @@ export class RecipesController {
     @UploadedFiles() files: Express.Multer.File[],
     @Body() body: any
   ) {
-    // Corrigir arrays que chegam como string
+    // Parse JSON se necessário
     if (typeof body.ingredients === 'string') {
       try {
         body.ingredients = JSON.parse(body.ingredients);
@@ -59,7 +59,12 @@ export class RecipesController {
       }
     }
 
+    // 👇 Conversão que resolve seu erro atual
+    body.servings = Number(body.servings);
+    body.timeMinutes = Number(body.timeMinutes);
+
     let newImages: { url: string; publicId: string }[] = [];
+
     if (files && files.length > 0) {
       newImages = await this.cloudinaryService.uploadMany(files);
     }
@@ -69,6 +74,7 @@ export class RecipesController {
       newImages,
     });
   }
+
 
 
 
