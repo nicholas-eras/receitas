@@ -166,25 +166,31 @@ export default function Home() {
           </div>
         )}
 
-        <input
-          type="file"
-          multiple accept="image/*"
-          capture="environment"          
-          onChange={(e) => {
-            const newFiles = Array.from(e.target.files || []);
+        <div className="mt-2">
+          <label className="block text-sm text-gray-300 mb-1">Imagens</label>
 
-              // Evita duplicação de arquivos com mesmo nome
-              const updatedFiles = [...selectedFiles, ...newFiles];
-              const updatedPreviews = [
-                ...imagePreviews,
-                ...newFiles.map((f) => URL.createObjectURL(f))
-              ];
+          <label className="inline-block bg-zinc-800 hover:bg-zinc-700 text-white font-medium py-2 px-4 rounded cursor-pointer">
+            📸 Selecionar ou Tirar Fotos
+            <input
+              type="file"
+              multiple
+              accept="image/*"
+              capture="environment"
+              onChange={(e) => {
+                const newFiles = Array.from(e.target.files || []);
+                const updatedFiles = [...selectedFiles, ...newFiles];
+                const updatedPreviews = [
+                  ...imagePreviews,
+                  ...newFiles.map((f) => URL.createObjectURL(f))
+                ];
+                setSelectedFiles(updatedFiles);
+                setImagePreviews(updatedPreviews);
+              }}
+              className="hidden"
+            />
+          </label>
+        </div>
 
-              setSelectedFiles(updatedFiles);
-              setImagePreviews(updatedPreviews);
-          }}
-          className="block w-full mt-2"
-        />
 
         <div className="flex flex-wrap gap-2 mt-2">
           {imagePreviews.map((src, i) => (
