@@ -8,11 +8,11 @@ export class RecipesService {
   constructor(private prisma: PrismaService, private cloudinary: CloudinaryService){}
 
   findAll() {
-    return this.prisma.recipe.findMany({ orderBy: { createdAt: 'desc' } })
+    return this.prisma.recipe.findMany({ orderBy: { createdAt: 'desc' },     include: { images: true }, })
   }
 
   findOne(id: string) {
-    return this.prisma.recipe.findUnique({ where: { id } })
+    return this.prisma.recipe.findUnique({ where: { id },     include: { images: true }, })
   }
 
   async create(data: any) {

@@ -3,14 +3,16 @@
 import { useEffect, useState } from 'react'
 
 export type Recipe = {
-  id: string
-  title: string
-  timeMinutes: number
-  servings: number
-  ingredients: string[]
-  steps: string[]
-  imageUrls: string[]
-}
+  id: string;
+  title: string;
+  timeMinutes: number;
+  servings: number;
+  ingredients: string[];
+  steps: string[];
+  images: { url: string; publicId: string }[]; // novo
+  imageUrls?: string[]; // opcional, derivado
+};
+
 
 export default function Home() {
   const [recipes, setRecipes] = useState<Recipe[]>([])
@@ -28,6 +30,7 @@ export default function Home() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingIngredientIndex, setEditingIngredientIndex] = useState<number | null>(null);
   const [editingStepIndex, setEditingStepIndex] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const addIngredient = () => {
     if (ingredientInput.trim()) {
@@ -70,6 +73,8 @@ export default function Home() {
       return;
     }
 
+    setLoading(true);
+
     const formData = new FormData();
     formData.append('title', title);
     formData.append('timeMinutes', String(timeMinutes));
@@ -93,30 +98,42 @@ export default function Home() {
       if (!res.ok) throw new Error('Erro ao salvar');
 
       const saved = await res.json();
+
       setRecipes(
         editingId ? recipes.map((r) => (r.id === editingId ? saved : r)) : [saved, ...recipes]
       );
 
-      setEditingId(null)
-      setTitle('')
-      setTimeMinutes('')
-      setServings('')
-      setIngredients([])
-      setSteps([])
-      setSelectedFiles([])
-      setImagePreviews([])
-      setExistingImageUrls([])
+      alert(editingId ? 'Receita atualizada com sucesso!' : 'Receita criada com sucesso!');
+
+      setEditingId(null);
+      setTitle('');
+      setTimeMinutes('');
+      setServings('');
+      setIngredients([]);
+      setSteps([]);
+      setSelectedFiles([]);
+      setImagePreviews([]);
+      setExistingImageUrls([]);
     } catch (err) {
       console.error(err);
       alert('Falha ao salvar.');
+    } finally {
+      setLoading(false);
     }
-  }
+  };
+
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/recipes`)
       .then((res) => res.json())
-      .then(setRecipes)
-  }, [])
+      .then((recipesFromApi) => {
+        const adapted = recipesFromApi.map((r: any) => ({
+          ...r,
+          imageUrls: r.images?.map((img: any) => img.url) ?? [],
+        }));
+        setRecipes(adapted);
+      });
+  }, []);
 
   return (
     <main className="max-w-3xl mx-auto py-8 px-4">
@@ -307,9 +324,18 @@ export default function Home() {
           ))}
         </div>
 
-        <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded font-semibold">
-          {editingId ? 'Salvar Alterações' : 'Salvar Receita'}
+        <button
+          type="submit"
+          disabled={loading}
+          className={`w-full text-white py-2 rounded font-semibold ${loading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
+        >
+          {loading
+            ? 'Salvando...'
+            : editingId
+            ? 'Salvar Alterações'
+            : 'Salvar Receita'}
         </button>
+
 
         {editingId && (
           <button type="button" className="w-full mt-2 bg-gray-700 hover:bg-gray-800 text-white py-2 rounded" onClick={() => {
@@ -347,10 +373,16 @@ export default function Home() {
 
             <p className="text-gray-400 text-sm mt-1">{r.timeMinutes} min • {r.servings} porções</p>
 
-            {r.imageUrls?.length > 0 && (
+            {Array.isArray(r.imageUrls) && r.imageUrls.length > 0 && (
               <div className="flex gap-2 flex-wrap mt-2">
                 {r.imageUrls.map((url, i) => (
-                  <img key={i} src={url} alt={`Imagem ${i + 1}`} className="w-32 h-32 object-cover rounded border border-zinc-700 cursor-zoom-in" onClick={() => setSelectedImage(url)} />
+                  <img
+                    key={i}
+                    src={url}
+                    alt={`Imagem ${i + 1}`}
+                    className="w-32 h-32 object-cover rounded border border-zinc-700 cursor-zoom-in"
+                    onClick={() => setSelectedImage(url)}
+                  />
                 ))}
               </div>
             )}
