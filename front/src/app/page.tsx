@@ -166,11 +166,25 @@ export default function Home() {
           </div>
         )}
 
-        <input type="file" multiple accept="image/*" onChange={(e) => {
-          const files = Array.from(e.target.files || [])
-          setSelectedFiles(files)
-          setImagePreviews(files.map(f => URL.createObjectURL(f)))
-        }} className="block w-full mt-2" />
+        <input
+          type="file"
+          multiple accept="image/*"
+          capture="environment"          
+          onChange={(e) => {
+            const newFiles = Array.from(e.target.files || []);
+
+              // Evita duplicação de arquivos com mesmo nome
+              const updatedFiles = [...selectedFiles, ...newFiles];
+              const updatedPreviews = [
+                ...imagePreviews,
+                ...newFiles.map((f) => URL.createObjectURL(f))
+              ];
+
+              setSelectedFiles(updatedFiles);
+              setImagePreviews(updatedPreviews);
+          }}
+          className="block w-full mt-2"
+        />
 
         <div className="flex flex-wrap gap-2 mt-2">
           {imagePreviews.map((src, i) => (
