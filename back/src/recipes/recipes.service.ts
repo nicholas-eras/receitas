@@ -34,31 +34,48 @@ export class RecipesService {
           })) ?? [],
         },
       },
-      include: { images: true }, // para retornar as imagens já no response
+      include: { images: true }, 
     });
   }
 
   async update(id: string, data: any) {
-    const existing = await this.prisma.recipe.findUnique({ where: { id }, include: { images: true } })
+    const existing = await this.prisma.recipe.findUnique({
+      where: { id },
+      include: { images: true },
+    });
 
-    const removed = existing!.images.filter(img => !data.imageUrls.some((url: string) => url === img.url))
+    const removed = existing!.images.filter(
+      (img) => !data.imageUrls.some((url: string) => url === img.url)
+    );
 
     for (const img of removed) {
       await this.cloudinary.deleteImage(img.publicId);
     }
 
-    // atualizar banco (excluir imagens antigas, adicionar novas)
     await this.prisma.image.deleteMany({
-      where: { recipeId: id, publicId: { in: removed.map(i => i.publicId) } }
-    })
-
-    await this.prisma.image.createMany({
-      data: data.newImages.map((img) => ({
-        url: img.url,
-        publicId: img.publicId,
+      where: {
         recipeId: id,
-      }))
-    })
+        publicId: { in: removed.map((i) => i.publicId) },
+      },
+    });
+
+    if (Array.isArray(data.newImages) && data.newImages.length > 0) {
+      const validImages = data.newImages.filter(
+        (img) => img?.url && img?.publicId
+      );
+
+      if (validImages.length !== data.newImages.length) {
+        throw new Error('Uma ou mais imagens novas estão incompletas.');
+      }
+
+      await this.prisma.image.createMany({
+        data: validImages.map((img) => ({
+          url: img.url,
+          publicId: img.publicId,
+          recipeId: id,
+        })),
+      });
+    }
 
     return this.prisma.recipe.update({
       where: { id },
@@ -68,9 +85,10 @@ export class RecipesService {
         timeMinutes: data.timeMinutes,
         ingredients: data.ingredients,
         steps: data.steps,
-      }
-    })
+      },
+    });
   }
+
 
 
   delete(id: string) {

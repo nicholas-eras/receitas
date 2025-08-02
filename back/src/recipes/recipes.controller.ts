@@ -42,12 +42,34 @@ export class RecipesController {
     @UploadedFiles() files: Express.Multer.File[],
     @Body() body: any
   ) {
-    const newImages = await this.cloudinaryService.uploadMany(files); // pode ser []
+    // Corrigir arrays que chegam como string
+    if (typeof body.ingredients === 'string') {
+      try {
+        body.ingredients = JSON.parse(body.ingredients);
+      } catch {
+        body.ingredients = [body.ingredients];
+      }
+    }
+
+    if (typeof body.steps === 'string') {
+      try {
+        body.steps = JSON.parse(body.steps);
+      } catch {
+        body.steps = [body.steps];
+      }
+    }
+
+    let newImages: { url: string; publicId: string }[] = [];
+    if (files && files.length > 0) {
+      newImages = await this.cloudinaryService.uploadMany(files);
+    }
+
     return this.recipesService.update(id, {
       ...body,
-      newImages, // isso agora existe
+      newImages,
     });
   }
+
 
 
   @Delete(':id')
