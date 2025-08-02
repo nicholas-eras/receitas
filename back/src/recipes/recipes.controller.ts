@@ -36,9 +36,19 @@ export class RecipesController {
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() body: any) {
-    return this.recipesService.update(id, body);
+  @UseInterceptors(FilesInterceptor('files'))
+  async update(
+    @Param('id') id: string,
+    @UploadedFiles() files: Express.Multer.File[],
+    @Body() body: any
+  ) {
+    const newImages = await this.cloudinaryService.uploadMany(files); // pode ser []
+    return this.recipesService.update(id, {
+      ...body,
+      newImages, // isso agora existe
+    });
   }
+
 
   @Delete(':id')
   delete(@Param('id') id: string) {
