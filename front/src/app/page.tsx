@@ -245,11 +245,33 @@ export default function Home() {
           </div>
         )}
 
-        <div className="mt-2">
+        <div className="mt-2 space-y-2">
           <label className="block text-sm text-gray-300 mb-1">Imagens</label>
 
+          {/* Tirar foto com a câmera */}
           <label className="inline-block bg-zinc-800 hover:bg-zinc-700 text-white font-medium py-2 px-4 rounded cursor-pointer">
-            📸 Selecionar ou Tirar Fotos
+            📷 Tirar Foto
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={(e) => {
+                const newFiles = Array.from(e.target.files || []);
+                const updatedFiles = [...selectedFiles, ...newFiles];
+                const updatedPreviews = [
+                  ...imagePreviews,
+                  ...newFiles.map((f) => URL.createObjectURL(f))
+                ];
+                setSelectedFiles(updatedFiles);
+                setImagePreviews(updatedPreviews);
+              }}
+              className="hidden"
+            />
+          </label>
+
+          {/* Selecionar da galeria */}
+          <label className="inline-block bg-zinc-800 hover:bg-zinc-700 text-white font-medium py-2 px-4 rounded cursor-pointer ml-2">
+            🖼️ Galeria
             <input
               type="file"
               multiple
@@ -268,7 +290,6 @@ export default function Home() {
             />
           </label>
         </div>
-
 
         <div className="flex flex-wrap gap-2 mt-2">
           {imagePreviews.map((src, i) => (
