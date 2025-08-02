@@ -26,6 +26,8 @@ export default function Home() {
   const [existingImageUrls, setExistingImageUrls] = useState<string[]>([])
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [editingIngredientIndex, setEditingIngredientIndex] = useState<number | null>(null);
+  const [editingStepIndex, setEditingStepIndex] = useState<number | null>(null);
 
   const addIngredient = () => {
     if (ingredientInput.trim()) {
@@ -138,7 +140,45 @@ export default function Home() {
             <input type="text" value={ingredientInput} onChange={(e) => setIngredientInput(e.target.value)} placeholder="Ex: 2 xícaras de leite" className="flex-1 p-2 rounded bg-zinc-800 text-white" onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addIngredient())} />
             <button type="button" onClick={addIngredient} className="bg-green-600 px-4 py-2 rounded text-white hover:bg-green-700">Adicionar</button>
           </div>
-          {ingredients.length > 0 && <ul className="list-disc ml-5 mt-2 text-gray-300 text-sm">{ingredients.map((i, idx) => <li key={idx}>{i}</li>)}</ul>}
+          {ingredients.length > 0 && 
+            <ul className="list-disc ml-5 mt-2 text-gray-300 text-sm">
+              {ingredients.map((i, idx) => (
+                <li key={idx} className="flex items-center justify-between">
+                  {editingIngredientIndex === idx ? (
+                    <input
+                      value={i}
+                      autoFocus
+                      onChange={(e) => {
+                        const updated = [...ingredients];
+                        updated[idx] = e.target.value;
+                        setIngredients(updated);
+                      }}
+                      onBlur={() => setEditingIngredientIndex(null)}
+                      className="bg-zinc-700 text-white p-1 rounded w-full mr-2"
+                    />
+                  ) : (
+                    <span
+                      onClick={() => setEditingIngredientIndex(idx)}
+                      className="flex-1 cursor-pointer hover:underline"
+                    >
+                      {i}
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const updated = [...ingredients];
+                      updated.splice(idx, 1);
+                      setIngredients(updated);
+                    }}
+                    className="text-red-500 text-xs ml-2"
+                  >
+                    ❌
+                  </button>
+                </li>
+              ))}
+            </ul>
+          }
         </div>
 
         <div>
@@ -147,7 +187,46 @@ export default function Home() {
             <input type="text" value={stepInput} onChange={(e) => setStepInput(e.target.value)} placeholder="Ex: Bata os ovos com o açúcar" className="flex-1 p-2 rounded bg-zinc-800 text-white" onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addStep())} />
             <button type="button" onClick={addStep} className="bg-purple-600 px-4 py-2 rounded text-white hover:bg-purple-700">Adicionar</button>
           </div>
-          {steps.length > 0 && <ol className="list-decimal ml-5 mt-2 text-gray-300 text-sm">{steps.map((s, idx) => <li key={idx}>{s}</li>)}</ol>}
+          {steps.length > 0 && 
+          <ol className="list-decimal ml-5 mt-2 text-gray-300 text-sm">
+            {steps.map((s, idx) => (
+              <li key={idx} className="flex items-center justify-between">
+                {editingStepIndex === idx ? (
+                  <input
+                    value={s}
+                    autoFocus
+                    onChange={(e) => {
+                      const updated = [...steps];
+                      updated[idx] = e.target.value;
+                      setSteps(updated);
+                    }}
+                    onBlur={() => setEditingStepIndex(null)}
+                    className="bg-zinc-700 text-white p-1 rounded w-full mr-2"
+                  />
+                ) : (
+                  <span
+                    onClick={() => setEditingStepIndex(idx)}
+                    className="flex-1 cursor-pointer hover:underline"
+                  >
+                    {s}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const updated = [...steps];
+                    updated.splice(idx, 1);
+                    setSteps(updated);
+                  }}
+                  className="text-red-500 text-xs ml-2"
+                >
+                  ❌
+                </button>
+              </li>
+            ))}
+          </ol>
+
+          }
         </div>
 
         {/* Imagens já existentes (modo edição) */}
@@ -175,7 +254,6 @@ export default function Home() {
               type="file"
               multiple
               accept="image/*"
-              capture="environment"
               onChange={(e) => {
                 const newFiles = Array.from(e.target.files || []);
                 const updatedFiles = [...selectedFiles, ...newFiles];
