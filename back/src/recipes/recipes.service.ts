@@ -44,8 +44,10 @@ export class RecipesService {
       include: { images: true },
     });
 
+    const imageUrls = Array.isArray(data.imageUrls) ? data.imageUrls : [];
+
     const removed = existing!.images.filter(
-      (img) => !data.imageUrls.some((url: string) => url === img.url)
+      (img) => !imageUrls.some((url: string) => url === img.url)
     );
 
     for (const img of removed) {
