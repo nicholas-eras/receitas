@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:15
@@ -21,9 +19,10 @@ services:
     container_name: receitas-back
     volumes:
       - ./back:/app
+      - /app/node_modules
     working_dir: /app
     ports:
-      - "3001:3001"
+      - "3003:3001"
     environment:
       DATABASE_URL: postgres://postgres:postgres@postgres:5432/receitas
     depends_on:
@@ -36,11 +35,12 @@ services:
     container_name: receitas-front
     volumes:
       - ./front:/app
+      - /app/node_modules
     working_dir: /app
     ports:
-      - "3000:3000"
+      - "3004:3000"
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:3001
+      NEXT_PUBLIC_API_URL: http://192.168.18.41:3003
     command: pnpm dev
     depends_on:
       - backend

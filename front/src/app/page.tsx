@@ -31,6 +31,7 @@ export default function Home() {
   const [editingIngredientIndex, setEditingIngredientIndex] = useState<number | null>(null);
   const [editingStepIndex, setEditingStepIndex] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const addIngredient = () => {
     if (ingredientInput.trim()) {
@@ -359,6 +360,32 @@ export default function Home() {
           <img src={selectedImage} alt="Visualização" className="max-w-full max-h-full rounded shadow-lg" />
         </div>
       )}
+      
+      {deletingId && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+          <div className="bg-zinc-900 p-6 rounded-lg shadow-lg border border-zinc-700 max-w-sm w-full text-white">
+            <h3 className="text-lg font-semibold mb-4">Confirmar Exclusão</h3>
+            <p className="text-sm text-gray-300 mb-6">Tem certeza que deseja excluir esta receita? Esta ação não pode ser desfeita.</p>
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={() => setDeletingId(null)}
+                className="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700 text-white"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={async () => {
+                  await deleteRecipe(deletingId);
+                  setDeletingId(null);
+                }}
+                className="px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-white"
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="space-y-4">
         {recipes.map((r) => (
@@ -367,7 +394,12 @@ export default function Home() {
               <h2 className="text-2xl font-semibold text-white">{r.title}</h2>
               <div className="flex gap-2">
                 <button onClick={() => startEditing(r)} className="text-sm px-2 py-1 rounded bg-yellow-600 hover:bg-yellow-700 text-white">✏️ Editar</button>
-                <button onClick={() => deleteRecipe(r.id)} className="text-sm px-2 py-1 rounded bg-red-600 hover:bg-red-700 text-white">🗑️ Excluir</button>
+                <button
+                  onClick={() => setDeletingId(r.id)}
+                  className="text-sm px-2 py-1 rounded bg-red-600 hover:bg-red-700 text-white"
+                >
+                  🗑️ Excluir
+                </button>
               </div>
             </div>
 

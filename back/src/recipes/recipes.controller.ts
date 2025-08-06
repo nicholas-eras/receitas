@@ -29,10 +29,7 @@ export class RecipesController {
     @Body() body: any
   ) {
     const imageUrls = await this.cloudinaryService.uploadMany(files);
-    return this.recipesService.create({
-      ...body,
-      imageUrls,
-    });
+    return this.recipesService.create(body, files);
   }
 
   @Put(':id')

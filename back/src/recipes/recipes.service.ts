@@ -15,28 +15,31 @@ export class RecipesService {
     return this.prisma.recipe.findUnique({ where: { id },     include: { images: true }, })
   }
 
-  async create(data: any) {
-    if (!data.title || !data.servings || !data.timeMinutes || !Array.isArray(data.ingredients)) {
-      throw new Error('Dados inválidos para criação de receita.');
-    }
+  async create(data: any, files: Express.Multer.File[]) {
+    const imageUrls = await this.cloudinary.uploadMany(files);
+
+    const { title, servings, timeMinutes, ingredients, steps } = data;
 
     return this.prisma.recipe.create({
       data: {
-        title: data.title,
-        servings: Number(data.servings),
-        timeMinutes: Number(data.timeMinutes),
-        ingredients: data.ingredients,
-        steps: data.steps,
+        title,
+        servings: Number(servings),
+        timeMinutes: Number(timeMinutes),
+        ingredients,
+        steps,
         images: {
-          create: data.images?.map((img) => ({
-            url: img.url,
-            publicId: img.publicId,
-          })) ?? [],
+          createMany: {
+            data: imageUrls.map((img) => ({
+              url: img.url,
+              publicId: img.publicId,
+            })),
+          },
         },
       },
-      include: { images: true }, 
+      include: { images: true },
     });
   }
+
 
   async update(id: string, data: any) {
     const existing = await this.prisma.recipe.findUnique({
