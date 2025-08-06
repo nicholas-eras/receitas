@@ -4,11 +4,11 @@ WORKDIR /app/
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-COPY package.json pnpm-lock.yaml ./
+COPY package.json ./
 COPY prisma ./prisma
 
 RUN pnpm install
 
-COPY . .
+COPY . ./
 
 CMD ["sh", "-c", "pnpm prisma migrate dev && pnpm run start:dev"]

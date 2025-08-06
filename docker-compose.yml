@@ -40,7 +40,7 @@ services:
     ports:
       - "3004:3000"
     environment:
-      NEXT_PUBLIC_API_URL: http://192.168.18.41:3003
+      NEXT_PUBLIC_API_URL: http://localhost:3003
     command: pnpm dev
     depends_on:
       - backend
