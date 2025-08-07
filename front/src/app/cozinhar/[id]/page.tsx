@@ -7,6 +7,7 @@ export default function CozinharPage() {
   const { id } = useParams()
   const router = useRouter()
   const [recipe, setRecipe] = useState<Recipe | null>(null)
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/recipes/${id}`)
@@ -39,12 +40,13 @@ export default function CozinharPage() {
         {recipe.imageUrls?.length! > 0 && (
           <div className="flex gap-2 flex-wrap mt-4">
             {recipe.imageUrls!.map((url, i) => (
-              <img
+                <img
                 key={i}
                 src={url}
                 alt={`Imagem ${i + 1}`}
-                className="w-32 h-32 object-cover rounded border border-zinc-700"
-              />
+                className="w-32 h-32 object-cover rounded border border-zinc-700 cursor-zoom-in"
+                onClick={() => setSelectedImage(url)}
+                />
             ))}
           </div>
         )}
@@ -63,6 +65,14 @@ export default function CozinharPage() {
           </ol>
         </div>
       </div>
+      {selectedImage && (
+        <div
+            onClick={() => setSelectedImage(null)}
+            className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 cursor-zoom-out"
+        >
+            <img src={selectedImage} alt="Visualização" className="max-w-full max-h-full rounded shadow-lg" />
+        </div>
+        )}
     </main>
   )
 }
