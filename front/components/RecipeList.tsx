@@ -1,5 +1,6 @@
 'use client'
 import { Recipe } from '@/app/page'
+import { useRouter } from 'next/navigation'
 
 interface Props {
   recipes: Recipe[]
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export default function RecipeList({ recipes, onEdit, onDelete, onViewImage, searchTerm }: Props) {
+  const router = useRouter()
   const lowerSearch = searchTerm?.toLowerCase() ?? ''
 
   const filtered = recipes.filter((r) => {
@@ -26,6 +28,7 @@ export default function RecipeList({ recipes, onEdit, onDelete, onViewImage, sea
           <div className="flex justify-between items-start">
             <h2 className="text-2xl font-semibold text-white">{r.title}</h2>
             <div className="flex gap-2">
+                <button onClick={() => router.push(`/cozinhar/${r.id}`)} className="text-sm px-2 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white">👨‍🍳 Cozinhar</button>
               <button onClick={() => onEdit(r)} className="text-sm px-2 py-1 rounded bg-yellow-600 hover:bg-yellow-700 text-white">✏️ Editar</button>
               <button onClick={() => onDelete(r.id)} className="text-sm px-2 py-1 rounded bg-red-600 hover:bg-red-700 text-white">🗑️ Excluir</button>
             </div>
